@@ -33,12 +33,6 @@ BOOT_APEX = "/apex/com.android.hardware.boot.apex"
 COMPOSER_APEX = "/apex/com.android.hardware.graphics.composer.drm_hwcomposer.apex"
 MTIME = 1230768000
 
-# The virtio tablet reports absolute coordinates; Android only handles those as a
-# touchscreen (the host cursor stays visible in the SDL window).
-TABLET_IDC = b"""device.internal = 1
-touch.deviceType = touchScreen
-"""
-
 KEYMINT_RC = b"""# AOSP software KeyMint: not hardware-backed.
 service vendor.keymint-default /vendor/bin/hw/android.hardware.security.keymint-service
     class early_hal
@@ -343,7 +337,6 @@ def build_vendor(
             files["boot"], "hal_bootctl_default_exec", 0o755,
         ),
     }
-    entries["usr/idc/QEMU_Virtio_Tablet.idc"] = (TABLET_IDC, "vendor_configs_file", 0o644)
     entries["etc/init/vm-diagnostic-log.rc"] = (LOG_RC, "vendor_configs_file", 0o644)
     contexts = "etc/selinux/vendor_file_contexts"
     contexts_meta = _inode_metadata(image, "/" + contexts, vendor_offset)
@@ -407,7 +400,7 @@ def build_vendor(
         output.write_bytes(f.read(original_size))
 
     overlay = workdir / "vm-vendor-overlay.tar"
-    existing = [".", "bin", "bin/hw", "etc", "etc/init", "etc/selinux", "etc/vintf", "etc/vintf/manifest", "lib64", "lib64/hw", "usr", "usr/idc"]
+    existing = [".", "bin", "bin/hw", "etc", "etc/init", "etc/selinux", "etc/vintf", "etc/vintf/manifest", "lib64", "lib64/hw"]
     with tarfile.open(overlay, "w", format=tarfile.PAX_FORMAT) as tar:
         for name in existing + ["lib64/vm_keymint"] + (["lib64/egl"] if graphics else []):
             if name in ("lib64/vm_keymint", "lib64/egl"):

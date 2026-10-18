@@ -124,5 +124,4 @@ is set. For speed the guest logcat sent to the serial log is kept minimal
 The guest display resolution follows the SDL window size (virtio-gpu reports
 it through EDID), so the guest starts tiny if the window is small. Maximize
 the window, or pass `--fullscreen`, to get the host resolution. The pointer is
-a `virtio-tablet-pci` (absolute); `vm_keymint.py` adds
-`/vendor/usr/idc/QEMU_Virtio_Tablet.idc` so Android treats it as a touchscreen (taps at the host cursor position).
+a `virtio-mouse-pci` (relative).

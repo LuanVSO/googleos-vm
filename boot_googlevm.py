@@ -1137,7 +1137,7 @@ def launch(
         "-device",
         "virtio-keyboard-pci",
         "-device",
-        "virtio-tablet-pci",
+        "virtio-mouse-pci",
         "-netdev",
         "user,id=net0",
         "-device",
