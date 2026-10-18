@@ -132,3 +132,7 @@ Like gbos-vm, networking is QEMU user-mode NAT (`ipv6=off`) exposed as a
 `usb-net` device on a `qemu-xhci` controller. The guest kernel's built-in
 xhci plus the image's `cdc_ether` module create `usb0`, which Android's
 ethernet service manages (a plain virtio-net `eth0` stayed down).
+
+A legacy `-net nic,model=virtio -net user,hostfwd=tcp::2222-:22` pair is also
+attached, so the guest has a virtio NIC (`eth0`) with host port 2222 forwarded
+to guest port 22.
