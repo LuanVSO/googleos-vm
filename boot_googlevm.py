@@ -19,6 +19,7 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
+import mesa_build
 import vm_keymint
 
 
@@ -264,12 +265,11 @@ def build_overlay(
         if preformat_userdata:
             write_preformatted_userdata(overlay, workdir, partitions["userdata"])
         if software_keymint:
-            runtime = workdir / "mesa-runtime"
-            has_gl = all((runtime / n).is_file() for n in vm_keymint.GRAPHICS_FILES.values())
-            if not has_gl:
-                print("note: no Mesa VirGL libraries in googlevm-build/mesa-runtime; "
-                      "run ./build_mesa_virgl.sh for guest graphics.")
-            write_vm_vendor(image, overlay, workdir, partitions, runtime if has_gl else None)
+            try:
+                runtime = mesa_build.build_mesa_runtime(workdir)
+            except mesa_build.MesaBuildError as error:
+                raise BootError(f"Could not set up guest graphics: {error}") from error
+            write_vm_vendor(image, overlay, workdir, partitions, runtime)
     except (FileNotFoundError, subprocess.CalledProcessError) as error:
         raise BootError(f"Could not build the boot overlay (needs qemu-img/qemu-io): {error}") from error
     return overlay
@@ -663,10 +663,21 @@ def _fetch_ci_artifacts(
         headers={"Content-Type": "application/json", "Accept": "application/json"},
         method="POST",
     )
-    try:
-        with urllib.request.urlopen(request, timeout=45) as response:
-            payload = json.load(response)
-    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as error:
+    error: Exception | None = None
+    for attempt in range(5):
+        try:
+            with urllib.request.urlopen(request, timeout=45) as response:
+                payload = json.load(response)
+            error = None
+            break
+        except urllib.error.HTTPError as http_error:
+            error = http_error
+            if http_error.code not in (429, 500, 502, 503, 504):
+                break
+        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as other:
+            error = other
+        time.sleep(10 * (attempt + 1))
+    if error is not None:
         raise BootError(
             f"Could not list Android CI artifacts for build {CI_BUILD_ID} "
             f"target {target}: {error}"
@@ -1041,8 +1052,13 @@ def check_host() -> None:
             "KVM is unavailable or /dev/kvm is not accessible to this user. "
             "Enable KVM access before launching."
         )
-    if shutil.which("qemu-system-x86_64") is None:
-        raise BootError("Missing qemu-system-x86_64.")
+    required_tools = [
+        "qemu-system-x86_64", "qemu-img", "qemu-io", "swtpm",
+        "mkfs.erofs", "dump.erofs", "debugfs", "ninja", "pkg-config", "tar",
+    ]
+    missing_tools = [tool for tool in required_tools if shutil.which(tool) is None]
+    if missing_tools:
+        raise BootError("Missing required host tools: " + ", ".join(missing_tools))
 
 
 def ensure_data_disk(path: Path, size: str) -> None:
@@ -1247,11 +1263,13 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--vm-keymint",
-        action="store_true",
+        action=argparse.BooleanOptionalAction,
+        default=True,
         help=(
             "replace the hardware Trusty KeyMint with AOSP software KeyMint from "
             "Google's public Cuttlefish x86_64 build (downloads ~1.1 GB once) and "
-            "mount /vendor without verified boot; keys are not hardware-backed"
+            "mount /vendor without verified boot; keys are not hardware-backed. "
+            "Also builds Mesa VirGL for the guest on first use (default: on)"
         ),
     )
     parser.add_argument(

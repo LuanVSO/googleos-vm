@@ -11,12 +11,19 @@ before being added to a generated VM initramfs.
 
 ## Requirements
 
+- https://dl.google.com/device/recovery/lapis-user/16452207/recovery.zip
 - Linux with `/dev/kvm` accessible to your user
 - A CPU with GFNI, AVX-VNNI, and SHA-NI (12th-generation Intel or newer is
   expected; some AMD CPUs may not provide the needed AVX-VNNI instruction)
 - `python3`, `lz4`, `modinfo`, `modprobe`, `nm`, `readelf`, `objcopy`,
   `qemu-img`, and `qemu-system-x86_64`
-- Network access to `ci.android.com` on the first run
+- Also: `swtpm`, `qemu-io`, `erofs-utils` (mkfs.erofs, dump.erofs), `debugfs`,
+  `ninja`, `pkg-config`, `tar`, and a host C toolchain
+- Network access on the first run. Only the original `.bin` is needed in this
+  folder; the launcher downloads the kernel/modules (ci.android.com), the
+  Cuttlefish KeyMint/composer files, the Android NDK r28c and Mesa 26.2.4
+  (checksum-pinned), and builds the Mesa virgl GLES libraries once into
+  `googlevm-build/mesa-runtime` (several minutes, ~1GB of downloads).
 
 ## Usage
 
@@ -81,7 +88,7 @@ guarantee that all Android desktop userspace components will work in QEMU.
 The image only ships a Trusty KeyMint, which needs hardware a plain QEMU VM does
 not have, so keystore2 never starts and boot stalls. Following the
 [gbos-vm](https://github.com/skylartaylor/gbos-vm) approach,
-`python3 boot_googlevm.py --vm-keymint` rebuilds `vendor_a` inside the
+`python3 boot_googlevm.py` (`--vm-keymint` is on by default; `--no-vm-keymint` disables it) rebuilds `vendor_a` inside the
 throwaway qcow2 overlay (the original `.bin` is never modified) with:
 
 - Google's software KeyMint and the stock AOSP boot-control HAL, taken from
