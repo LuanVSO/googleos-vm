@@ -22,7 +22,7 @@ before being added to a generated VM initramfs.
 - Network access on the first run. Only the original `.bin` is needed in this
   folder; the launcher downloads the kernel/modules (ci.android.com), the
   Cuttlefish KeyMint/composer files, the Android NDK r28c and Mesa 26.2.4
-  (checksum-pinned), and builds the Mesa virgl GLES libraries once into
+  (checksum-pinned), and builds the Mesa virgl GLES and Venus Vulkan libraries once into
   `googlevm-build/mesa-runtime` (several minutes, ~1GB of downloads).
 
 ## Usage
@@ -108,7 +108,7 @@ data disk is recreated on every `--vm-keymint` launch. If vendor no longer
 fits its partition it is relocated into free space in `super` with re-hashed
 LP metadata. Status: the guest reaches `sys.boot_completed=1` and the launcher
 runs. The Mesa libraries were built with the Android NDK (r28c) from Mesa
-26.2.4 using `-Dgallium-drivers=virgl -Dplatforms=android`.
+26.2.4 using `-Dgallium-drivers=virgl -Dvulkan-drivers=virtio (Venus, installed as vendor lib64/hw/vulkan.virtio.so, ro.hardware.vulkan=virtio) -Dplatforms=android`.
 
 ### Display (hwcomposer)
 

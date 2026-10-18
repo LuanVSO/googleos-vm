@@ -31,6 +31,7 @@ OUTPUTS = {
     "src/mesa/glapi/es1api/libGLESv1_CM_virgl.so": "libGLESv1_CM_virgl.so",
     "src/mesa/glapi/es2api/libGLESv2_virgl.so": "libGLESv2_virgl.so",
     "src/gallium/targets/dri/libgallium_dri.so": "libgallium_dri.so",
+    "src/virtio/vulkan/libvulkan_virtio.so": "vulkan.virtio.so",
 }
 
 MESON_OPTIONS = (
@@ -48,7 +49,7 @@ MESON_OPTIONS = (
     "-Dgallium-va=disabled",
     "-Dzstd=disabled",
     "-Dgallium-drivers=virgl",
-    "-Dvulkan-drivers=",
+    "-Dvulkan-drivers=virtio",
     "-Degl=enabled",
     "-Dgles1=enabled",
     "-Dgles2=enabled",

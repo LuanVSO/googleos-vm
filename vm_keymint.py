@@ -292,11 +292,12 @@ GRAPHICS_FILES = {
     "lib64/egl/libGLESv1_CM_virgl.so": "libGLESv1_CM_virgl.so",
     "lib64/egl/libGLESv2_virgl.so": "libGLESv2_virgl.so",
     "lib64/libgallium_dri.so": "libgallium_dri.so",
+    "lib64/hw/vulkan.virtio.so": "vulkan.virtio.so",
 }
 # Mesa VirGL GLES for SurfaceFlinger/HWUI instead of ANGLE over the Intel Vulkan driver.
 GRAPHICS_PROPS = {
     "ro.hardware.egl": "virgl",
-    "ro.hardware.vulkan": "none",
+    "ro.hardware.vulkan": "virtio",
     "ro.hwui.use_vulkan": "false",
     "debug.renderengine.backend": "skiaglthreaded",
     "debug.renderengine.vulkan": "false",
@@ -406,7 +407,7 @@ def build_vendor(
         output.write_bytes(f.read(original_size))
 
     overlay = workdir / "vm-vendor-overlay.tar"
-    existing = [".", "bin", "bin/hw", "etc", "etc/init", "etc/selinux", "etc/vintf", "etc/vintf/manifest", "lib64", "usr", "usr/idc"]
+    existing = [".", "bin", "bin/hw", "etc", "etc/init", "etc/selinux", "etc/vintf", "etc/vintf/manifest", "lib64", "lib64/hw", "usr", "usr/idc"]
     with tarfile.open(overlay, "w", format=tarfile.PAX_FORMAT) as tar:
         for name in existing + ["lib64/vm_keymint"] + (["lib64/egl"] if graphics else []):
             if name in ("lib64/vm_keymint", "lib64/egl"):
