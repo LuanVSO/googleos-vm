@@ -124,7 +124,7 @@ is set. For speed the guest logcat sent to the serial log is kept minimal
 The guest display resolution follows the SDL window size (virtio-gpu reports
 it through EDID), so the guest starts tiny if the window is small. Maximize
 the window, or pass `--fullscreen`, to get the host resolution. The pointer is
-a `virtio-mouse-pci` (relative).
+a `usb-mouse` (relative, on the xhci controller).
 
 ### Network
 

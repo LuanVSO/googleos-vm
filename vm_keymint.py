@@ -42,7 +42,7 @@ service vendor.keymint-default /vendor/bin/hw/android.hardware.security.keymint-
 
 
 LOG_RC = b"""# Mirror framework and keystore logs to the serial console for diagnosis.
-service vm-diagnostic-log /system/bin/sh -c "exec /system/bin/logcat -b all -v threadtime *:S keystore2:W SystemServer:I AndroidRuntime:E"
+service vm-diagnostic-log /system/bin/sh -c "exec /system/bin/logcat -b all -v threadtime *:S EthernetTracker:V EthernetNetworkFactory:V EthernetServiceImpl:V EthernetNetworkAgent:V IpClient.usb0:V IpClient:V NetworkStackClient:V NetworkStack:V NetworkStackConnector:V NetworkStackService:V NetworkStackNotifier:V DhcpClient:V NetworkMonitor:V NetdEventListener:V ConnectivityService:S keystore2:W SystemServer:I AndroidRuntime:E"
     class core
     user shell
     group shell log readproc
