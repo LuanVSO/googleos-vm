@@ -1,8 +1,4 @@
-# Disk image (19 GB, supplied by the user)
 *.bin
-
-# Everything generated or downloaded by the launcher
-googlevm-build/
-
+work/
 __pycache__/
 *.pyc

@@ -19,8 +19,10 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-import mesa_build
-import vm_keymint
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "image"))
+
+import mesa_build  # noqa: E402
+import vm_keymint  # noqa: E402
 
 
 SECTOR_SIZE = 512
@@ -926,7 +928,7 @@ def prepare(
     software_keymint: bool = False,
 ) -> tuple[Path, Path, str]:
     if not image.is_file():
-        raise BootError(f"Recovery image not found: {image}")
+        raise BootError(f"Recovery image not found: {image}. Run ./install.sh to download it.")
     workdir.mkdir(parents=True, exist_ok=True)
 
     partitions = read_gpt_partitions(image)
@@ -1055,6 +1057,7 @@ def check_host() -> None:
     required_tools = [
         "qemu-system-x86_64", "qemu-img", "qemu-io", "swtpm",
         "mkfs.erofs", "dump.erofs", "debugfs", "ninja", "pkg-config", "tar",
+        "lz4", "modinfo", "modprobe", "nm", "readelf", "objcopy",
     ]
     missing_tools = [tool for tool in required_tools if shutil.which(tool) is None]
     if missing_tools:
@@ -1220,20 +1223,20 @@ def launch(
 
 
 def parse_args() -> argparse.Namespace:
-    workspace = Path(__file__).resolve().parent
+    workspace = Path(__file__).resolve().parent.parent / "work"
     parser = argparse.ArgumentParser(
         description="Prepare and boot the local Android desktop recovery image."
     )
     parser.add_argument(
         "--image",
         type=Path,
-        default=workspace / "android-desktop_signed_recovery_image.bin",
-        help="raw recovery image (default: the image in this script's folder)",
+        default=workspace / "image" / "android-desktop_signed_recovery_image.bin",
+        help="raw recovery image (default: work/image/, put there by install.sh)",
     )
     parser.add_argument(
         "--workdir",
         type=Path,
-        default=workspace / "googlevm-build",
+        default=workspace / "build",
         help="directory for downloaded modules and generated boot files",
     )
     parser.add_argument("--memory", default="8G", help="VM memory (default: 8G)")
