@@ -1153,7 +1153,7 @@ def launch(
         "-vga",
         "none",
         "-display",
-        "sdl,gl=on,show-cursor=on" + (",full-screen=on" if fullscreen else ""),
+        "gtk,gl=on,show-cursor=on" + (",full-screen=on" if fullscreen else ""),
         "-object",
         "memory-backend-memfd,id=mem1,size=8G,share=on",
         "-serial",
