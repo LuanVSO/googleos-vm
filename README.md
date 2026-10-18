@@ -125,3 +125,10 @@ The guest display resolution follows the SDL window size (virtio-gpu reports
 it through EDID), so the guest starts tiny if the window is small. Maximize
 the window, or pass `--fullscreen`, to get the host resolution. The pointer is
 a `virtio-mouse-pci` (relative).
+
+### Network
+
+Like gbos-vm, networking is QEMU user-mode NAT (`ipv6=off`) exposed as a
+`usb-net` device on a `qemu-xhci` controller. The guest kernel's built-in
+xhci plus the image's `cdc_ether` module create `usb0`, which Android's
+ethernet service manages (a plain virtio-net `eth0` stayed down).
