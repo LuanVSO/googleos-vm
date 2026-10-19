@@ -96,6 +96,8 @@ SurfaceFlinger and the UI render through Mesa GLES, not Vulkan.
 
 ## Notes
 
+- `--skip-setup` marks provisioning complete and disables the setup wizard (offline desktop).
+- `python3 tests/soak.py [runs] [timeout]` boots repeatedly as a smoke test.
 - `GOOGLEVM_WORK` overrides the work directory.
 - Ported from gbos-vm: quiet absent-hardware services (gscd, Trusty secretkeeper) and a trimmed diagnostic logcat filter.
 - Not ported: macOS-specific pieces (viewer, Metal/MoltenVK patches, SELinux shm policy). Credits: skylartaylor/gbos-vm, Mesa, Cuttlefish. No LICENSE file is included; add one if you want.

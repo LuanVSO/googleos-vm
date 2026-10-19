@@ -60,6 +60,38 @@ on early-init
     stop vendor.secretkeeper.trusty
 """
 
+SKIP_SETUP = False  # set by the launcher for --skip-setup
+
+OFFLINE_DESKTOP_SH = b"""#!/system/bin/sh
+# Mark provisioning done so the desktop starts without the online setup wizard.
+for i in $(seq 1 120); do
+    user=$(am get-current-user 2>/dev/null)
+    [ -n "$user" ] && break
+    sleep 1
+done
+user=${user:-0}
+for u in 0 $user; do
+    settings put --user $u global device_provisioned 1
+    settings put --user $u secure user_setup_complete 1
+done
+for pkg in com.google.android.setupwizard com.google.android.desktop.setupwizard; do
+    pm disable-user --user $user $pkg
+done
+svc power stayon true
+am start --user $user -a android.intent.action.MAIN -c android.intent.category.HOME
+"""
+
+OFFLINE_DESKTOP_RC = b"""service vm-offline-desktop /vendor/bin/vm-offline-desktop.sh
+    user shell
+    group shell log
+    seclabel u:r:shell:s0
+    oneshot
+    disabled
+
+on property:sys.boot_completed=1
+    start vm-offline-desktop
+"""
+
 
 # apexd reads this from the kernel command line (ro.boot.vendor.apex.<name>); the
 # StrongBox apex would otherwise declare a KeyMint device that keystore2 requires.
@@ -323,7 +355,7 @@ def build_vendor(
     output = workdir / "vm-vendor.erofs"
     stamp = workdir / "vm-vendor.stamp"
     fingerprint = f"{image.stat().st_size}:{vendor_offset}:{Path(__file__).stat().st_mtime_ns}"
-    fingerprint += f":dd{int(data_disk)}"
+    fingerprint += f":dd{int(data_disk)}:ss{int(SKIP_SETUP)}"
     if graphics is not None:
         fingerprint += ":" + ",".join(
             str((graphics / n).stat().st_mtime_ns) for n in sorted(GRAPHICS_FILES.values())
@@ -345,6 +377,9 @@ def build_vendor(
         ),
     }
     entries["etc/init/vm-absent-hardware.rc"] = (ABSENT_HARDWARE_RC, "vendor_configs_file", 0o644)
+    if SKIP_SETUP:
+        entries["bin/vm-offline-desktop.sh"] = (OFFLINE_DESKTOP_SH, "shell_exec", 0o755)
+        entries["etc/init/vm-offline-desktop.rc"] = (OFFLINE_DESKTOP_RC, "vendor_configs_file", 0o644)
     entries["etc/init/vm-diagnostic-log.rc"] = (LOG_RC, "vendor_configs_file", 0o644)
     contexts = "etc/selinux/vendor_file_contexts"
     contexts_meta = _inode_metadata(image, "/" + contexts, vendor_offset)

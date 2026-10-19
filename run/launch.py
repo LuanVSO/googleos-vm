@@ -1299,11 +1299,16 @@ def parse_args() -> argparse.Namespace:
             "HAL SELinux policy only allows nvme/sd/mmc block devices)"
         ),
     )
+    parser.add_argument(
+        "--skip-setup", action="store_true",
+        help="Mark provisioning complete and disable the setup wizard (offline desktop).",
+    )
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
+    vm_keymint.SKIP_SETUP = args.skip_setup
     image = args.image.expanduser().resolve()
     workdir = args.workdir.expanduser().resolve()
     if args.cpus < 1:
