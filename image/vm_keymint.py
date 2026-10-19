@@ -42,7 +42,7 @@ service vendor.keymint-default /vendor/bin/hw/android.hardware.security.keymint-
 
 
 LOG_RC = b"""# Mirror framework and keystore logs to the serial console for diagnosis.
-service vm-diagnostic-log /system/bin/sh -c "exec /system/bin/logcat -b all -v threadtime *:S EthernetTracker:V EthernetNetworkFactory:V EthernetServiceImpl:V EthernetNetworkAgent:V IpClient.usb0:V IpClient:V NetworkStackClient:V NetworkStack:V NetworkStackConnector:V NetworkStackService:V NetworkStackNotifier:V DhcpClient:V NetworkMonitor:V NetdEventListener:V ConnectivityService:S keystore2:W SystemServer:I AndroidRuntime:E"
+service vm-diagnostic-log /system/bin/sh -c "exec /system/bin/logcat -b all -v threadtime *:S keystore2:W SystemServer:I AndroidRuntime:E"
     class core
     user shell
     group shell log readproc
@@ -51,6 +51,13 @@ service vm-diagnostic-log /system/bin/sh -c "exec /system/bin/logcat -b all -v t
 
 on init
     start vm-diagnostic-log
+"""
+
+# Trusty/ChromeOS-firmware daemons have no counterpart in a VM and only crash-loop.
+ABSENT_HARDWARE_RC = b"""# Stop services whose hardware is absent in the VM.
+on early-init
+    stop android.system.desktop.security.gscd
+    stop vendor.secretkeeper.trusty
 """
 
 
@@ -337,6 +344,7 @@ def build_vendor(
             files["boot"], "hal_bootctl_default_exec", 0o755,
         ),
     }
+    entries["etc/init/vm-absent-hardware.rc"] = (ABSENT_HARDWARE_RC, "vendor_configs_file", 0o644)
     entries["etc/init/vm-diagnostic-log.rc"] = (LOG_RC, "vendor_configs_file", 0o644)
     contexts = "etc/selinux/vendor_file_contexts"
     contexts_meta = _inode_metadata(image, "/" + contexts, vendor_offset)

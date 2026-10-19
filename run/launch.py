@@ -1223,7 +1223,7 @@ def launch(
 
 
 def parse_args() -> argparse.Namespace:
-    workspace = Path(__file__).resolve().parent.parent / "work"
+    workspace = Path(os.environ.get("GOOGLEVM_WORK") or Path(__file__).resolve().parent.parent / "work")
     parser = argparse.ArgumentParser(
         description="Prepare and boot the local Android desktop recovery image."
     )

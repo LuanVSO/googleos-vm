@@ -93,3 +93,9 @@ SurfaceFlinger and the UI render through Mesa GLES, not Vulkan.
 - No hardware-backed keys, battery, or working HDA audio (the guest kernel has no battery or HDA driver).
 - Non-fatal noise in the logs: Trusty secretkeeper/weaver/authgraph aborts, audio/EC HAL errors, a timberslide crash, and `vrend` "RegionSampling" errors on the host.
 - `--insecure-vm-userdata` only removes userdata encryption flags from the first-stage fstab and does not make the stock Trusty-dependent boot work; it is superseded by `--vm-keymint`. Do not use it for sensitive data.
+
+## Notes
+
+- `GOOGLEVM_WORK` overrides the work directory.
+- Ported from gbos-vm: quiet absent-hardware services (gscd, Trusty secretkeeper) and a trimmed diagnostic logcat filter.
+- Not ported: macOS-specific pieces (viewer, Metal/MoltenVK patches, SELinux shm policy). Credits: skylartaylor/gbos-vm, Mesa, Cuttlefish. No LICENSE file is included; add one if you want.
